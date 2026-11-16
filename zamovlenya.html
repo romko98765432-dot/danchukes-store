@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформлення замовлення - Danchukes-store</title>
+    <meta name="description" content="Оформлення замовлення в Danchukes-store: доставка Новою Поштою, оплата при отриманні.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A6%86</text></svg>">
+    <!-- Bootstrap 5 (підключення через CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Свої стилі підключаємо ПІСЛЯ Bootstrap, щоб вони могли його перевизначати -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header header-page" id="top">
+        <a class="logo" href="index.html">Danchukes-store 🦆</a>
+        <h1>Оформлення замовлення</h1>
+        <div class="d-flex gap-2">
+            <a class="btn" href="cart.html" aria-label="Кошик">🛒 <span class="cart-count" data-cart-count hidden>0</span></a>
+            <a class="btn" href="index.html" aria-label="На головну">✖</a>
+        </div>
+    </header>
+    <nav class="subnav">
+        <a href="index.html">Головна</a>
+        <a href="catalog.html">Каталог</a>
+        <a href="about.html">Про нас</a>
+        <a href="contacts.html">Контакти</a>
+    </nav>
+
+    <main class="container">
+        <form class="form mx-auto p-4" action="dyakuyu.html" method="get">
+            <h2 class="mb-3">Ваше замовлення</h2>
+            <!-- Товари з кошика (модель, розмір, кількість) підставляє shop.js -->
+            <div id="order-summary" class="mb-4"></div>
+
+            <h2 class="mb-3">Контактні дані</h2>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Телефон:</label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+380 97 123 45 67" autocomplete="tel" inputmode="tel" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Прізвище та ім'я:</label>
+                <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Введіть прізвище та ім'я" autocomplete="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" autocomplete="email" required>
+            </div>
+
+            <!-- Місто й відділення поруч на комп'ютері і одне під одним на телефоні -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="city" class="form-label">Населений пункт:</label>
+                    <input class="form-control" id="city" name="city" list="cities" placeholder="Наприклад, Львів" autocomplete="address-level2" required>
+                    <!-- Підказки під час введення; можна вписати будь-який населений пункт -->
+                    <datalist id="cities">
+                        <option value="Київ">
+                        <option value="Львів">
+                        <option value="Харків">
+                        <option value="Одеса">
+                        <option value="Дніпро">
+                        <option value="Запоріжжя">
+                        <option value="Вінниця">
+                        <option value="Полтава">
+                        <option value="Івано-Франківськ">
+                        <option value="Тернопіль">
+                        <option value="Луцьк">
+                        <option value="Рівне">
+                        <option value="Ужгород">
+                        <option value="Чернівці">
+                        <option value="Хмельницький">
+                        <option value="Житомир">
+                        <option value="Черкаси">
+                        <option value="Суми">
+                        <option value="Чернігів">
+                        <option value="Кропивницький">
+                        <option value="Миколаїв">
+                        <option value="Херсон">
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label for="department" class="form-label">Відділення / поштомат НП:</label>
+                    <input class="form-control" id="department" name="department" placeholder="Напр., відділення 12" required>
+                </div>
+            </div>
+
+            <!-- Пастка для спам-ботів: людина це поле не бачить, бот заповнить -->
+            <input type="checkbox" id="botcheck" name="botcheck" class="d-none" tabindex="-1" autocomplete="off">
+
+            <p id="order-status" class="order-error mt-3 mb-0" role="alert" hidden></p>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-big btn-main">Замовити</button>
+            </div>
+        </form>
+    </main>
+
+    <footer class="footer mt-5">
+        <div class="container d-flex justify-content-between align-items-end">
+            <div>
+                <h2 class="h4">Danchukes-store</h2>
+                <p>📞 <a href="tel:+380977653938"><strong>+380 97 765 39 38</strong></a></p>
+                <p>✉️ <a href="mailto:danchukesstore@gmail.com"><strong>danchukesstore@gmail.com</strong></a></p>
+                <p><small>© 2026 Danchukes-store. Усі права захищено.</small></p>
+            </div>
+            <div class="footer-duck">🦆</div>
+        </div>
+    </footer>
+
+    <script src="shop.js"></script>
+</body>
+</html>
