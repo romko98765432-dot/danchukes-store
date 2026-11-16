@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Карта сайту для Google: список усіх сторінок.
+     Додаючи новий товар у shop.js, допишіть сюди рядок <url> з його product.html?id=... -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/</loc><lastmod>2026-11-16</lastmod><priority>1.0</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/catalog.html</loc><lastmod>2026-11-16</lastmod><priority>0.9</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=puma-speedcat</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=nike-acg-khaki</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=nike-acg-black</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=premiata</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=chunky</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=nb-1900</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=salomon-xt6</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=nb-530</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/product.html?id=loro-piana</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/about.html</loc><lastmod>2026-11-16</lastmod><priority>0.5</priority></url>
+    <url><loc>https://romko98765432-dot.github.io/danchukes-store/contacts.html</loc><lastmod>2026-11-16</lastmod><priority>0.6</priority></url>
+</urlset>

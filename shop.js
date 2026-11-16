@@ -31,6 +31,8 @@ const HOME_PRODUCTS = ['puma-speedcat', 'nike-acg-khaki', 'nike-acg-black', 'pre
 const SIZE_GUIDE = { 36: 23, 37: 23.5, 38: 24, 39: 25, 40: 25.5, 41: 26, 42: 26.5, 43: 27.5, 44: 28, 45: 29 };
 
 const CART_KEY = 'danchukes-cart';
+const FAV_KEY = 'danchukes-fav';        // обране (♥)
+const RECENT_KEY = 'danchukes-recent';  // нещодавно переглянуті
 const MAX_QTY = 10;
 
 /* ===== Допоміжні функції ===== */
@@ -81,11 +83,77 @@ function updateCartCount() {
     });
 }
 
+/* ===== Списки id у браузері: обране і нещодавно переглянуті ===== */
+function loadIds(key) {
+    try {
+        const data = JSON.parse(localStorage.getItem(key));
+        return Array.isArray(data) ? data.filter(id => getProduct(id)) : [];
+    } catch (e) {
+        return [];
+    }
+}
+function saveIds(key, ids) {
+    try { localStorage.setItem(key, JSON.stringify(ids)); } catch (e) { /* сховище недоступне */ }
+}
+
+const isFav = id => loadIds(FAV_KEY).includes(id);
+
+function toggleFav(id) {
+    const favs = loadIds(FAV_KEY);
+    const on = !favs.includes(id);
+    saveIds(FAV_KEY, on ? [id, ...favs] : favs.filter(x => x !== id));
+    return on;
+}
+
+// Кнопка ♥ на картці (data-fav-label — велика кнопка з текстом на сторінці товару)
+function favButton(id, withLabel) {
+    const on = isFav(id);
+    const cls = withLabel ? 'btn fav-toggle' : 'fav-btn';
+    return `<button type="button" class="${cls}${on ? ' on' : ''}" data-fav="${id}"${withLabel ? ' data-fav-label' : ''}
+        aria-pressed="${on}" aria-label="${on ? 'Прибрати з обраного' : 'Додати в обране'}">${favText(on, withLabel)}</button>`;
+}
+function favText(on, withLabel) {
+    if (withLabel) return on ? '♥ В обраному' : '♡ В обране';
+    return on ? '♥' : '♡';
+}
+function setFavState(btn, on) {
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on);
+    btn.setAttribute('aria-label', on ? 'Прибрати з обраного' : 'Додати в обране');
+    btn.textContent = favText(on, btn.hasAttribute('data-fav-label'));
+}
+
+// Один обробник ♥ на всі сторінки
+document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-fav]');
+    if (!btn) return;
+    e.preventDefault();
+    const on = toggleFav(btn.dataset.fav);
+    document.querySelectorAll(`[data-fav="${btn.dataset.fav}"]`).forEach(b => setFavState(b, on));
+    document.dispatchEvent(new CustomEvent('favchange'));
+});
+
+function rememberViewed(id) {
+    saveIds(RECENT_KEY, [id, ...loadIds(RECENT_KEY).filter(x => x !== id)].slice(0, 8));
+}
+
+// «Ви нещодавно переглядали» (без поточного товару)
+function renderRecent(root, exceptId) {
+    const ids = loadIds(RECENT_KEY).filter(id => id !== exceptId).slice(0, 4);
+    root.hidden = ids.length === 0;
+    if (!ids.length) return;
+    root.innerHTML = '<h2 class="mb-3">Ви нещодавно переглядали</h2>' +
+        '<div class="row row-cols-2 row-cols-md-4 g-3">' + ids.map(getProduct).map(productCard).join('') + '</div>';
+}
+
 /* ===== Картка товару ===== */
 function productCard(p) {
     const url = productUrl(p);
     return `<div class="col"><div class="card h-100 border-0 text-center">
-        <a href="${url}"><img src="${p.img}" class="card-img-top" alt="${p.name}" loading="lazy"></a>
+        <div class="card-img-wrap">
+            <a href="${url}"><img src="${p.img}" class="card-img-top" alt="${p.name}" loading="lazy"></a>
+            ${favButton(p.id)}
+        </div>
         <div class="card-body d-flex flex-column">
             <h3 class="card-title"><a href="${url}">${p.name}</a></h3>
             <p class="card-price">${formatPrice(p.price)}</p>
@@ -102,7 +170,12 @@ function renderFeatured(root) {
 /* ===== Каталог: пошук, фільтр за брендом, сортування ===== */
 function renderCatalog() {
     const params = new URLSearchParams(location.search);
-    const state = { q: params.get('q') || '', brand: params.get('brand') || '', sort: 'default' };
+    const state = {
+        q: params.get('q') || '',
+        brand: params.get('brand') || '',
+        favOnly: params.get('fav') === '1',
+        sort: 'default'
+    };
 
     const tools = document.getElementById('catalog-tools');
     const search = document.getElementById('catalog-search');
@@ -117,12 +190,15 @@ function renderCatalog() {
     const brands = [...new Set(PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b));
     chips.innerHTML = ['', ...brands]
         .map(b => `<button type="button" class="chip" data-brand="${b}">${b || 'Усі бренди'}</button>`)
-        .join('');
+        .join('') +
+        '<button type="button" class="chip chip-fav" data-fav-filter>♥ Обране</button>';
 
     function update() {
         const q = state.q.trim().toLowerCase();
+        const favs = loadIds(FAV_KEY);
         const list = PRODUCTS.filter(p =>
             (!state.brand || p.brand === state.brand) &&
+            (!state.favOnly || favs.includes(p.id)) &&
             (!q || (p.name + ' ' + p.brand).toLowerCase().includes(q))
         );
         if (state.sort === 'cheap') list.sort((a, b) => a.price - b.price);
@@ -131,15 +207,24 @@ function renderCatalog() {
 
         grid.innerHTML = list.map(productCard).join('');
         empty.hidden = list.length > 0;
+        emptyText.textContent = state.favOnly && !favs.length
+            ? 'В обраному поки нічого немає. Натисніть ♡ на картці товару, щоб зберегти його.'
+            : 'Спробуйте іншу назву або скиньте фільтри.';
         countEl.textContent = list.length + ' ' + plural(list.length, 'модель', 'моделі', 'моделей');
-        chips.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.brand === state.brand));
+        chips.querySelectorAll('.chip[data-brand]').forEach(c => c.classList.toggle('active', c.dataset.brand === state.brand));
+        chips.querySelector('[data-fav-filter]').classList.toggle('active', state.favOnly);
 
-        // Пошук і бренд зберігаються в адресі — таким посиланням можна поділитися
+        // Пошук, бренд і «Обране» зберігаються в адресі — таким посиланням можна поділитися
         const url = new URL(location.href);
         state.q ? url.searchParams.set('q', state.q) : url.searchParams.delete('q');
         state.brand ? url.searchParams.set('brand', state.brand) : url.searchParams.delete('brand');
+        state.favOnly ? url.searchParams.set('fav', '1') : url.searchParams.delete('fav');
         history.replaceState(null, '', url);
     }
+
+    const emptyText = document.getElementById('catalog-empty-text');
+    // Якщо прибрали ♥, коли відкрито «Обране», картка одразу зникає
+    document.addEventListener('favchange', () => { if (state.favOnly) update(); });
 
     search.addEventListener('input', () => { state.q = search.value; update(); });
     sortSel.addEventListener('change', () => { state.sort = sortSel.value; update(); });
@@ -147,11 +232,12 @@ function renderCatalog() {
     chips.addEventListener('click', e => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
-        state.brand = chip.dataset.brand;
+        if (chip.hasAttribute('data-fav-filter')) state.favOnly = !state.favOnly;
+        else state.brand = chip.dataset.brand;
         update();
     });
     document.getElementById('catalog-reset').addEventListener('click', () => {
-        state.q = ''; state.brand = ''; search.value = '';
+        state.q = ''; state.brand = ''; state.favOnly = false; search.value = '';
         update();
     });
 
@@ -185,7 +271,10 @@ function renderProduct(root) {
             <div class="col-md-6"><img class="product-img" src="${p.img}" alt="${p.name}"></div>
             <div class="col-md-6">
                 <p class="text-muted mb-1">${p.brand}</p>
-                <h2>${p.name}</h2>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <h2>${p.name}</h2>
+                    ${favButton(p.id, true)}
+                </div>
                 <p class="product-price">${formatPrice(p.price)}</p>
                 <p class="mb-1"><b>Оберіть розмір (EU)</b></p>
                 <div class="size-grid" role="radiogroup" aria-label="Розмір">${sizeButtons}</div>
@@ -251,6 +340,11 @@ function renderProduct(root) {
         related.innerHTML = '<h2 class="mb-3">Вам також сподобається</h2>' +
             '<div class="row row-cols-2 row-cols-md-4 g-3">' + others.map(productCard).join('') + '</div>';
     }
+
+    // Спершу показуємо попередні перегляди, потім запам'ятовуємо цей товар
+    const recent = document.getElementById('recent');
+    if (recent) renderRecent(recent, p.id);
+    rememberViewed(p.id);
 }
 
 /* ===== Кошик ===== */
@@ -450,7 +544,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
 
     const featured = document.getElementById('featured');
-    if (featured) renderFeatured(featured);
+    if (featured) {
+        renderFeatured(featured);
+        const recent = document.getElementById('recent');
+        if (recent) renderRecent(recent, null);
+    }
 
     if (document.getElementById('catalog-grid')) renderCatalog();
 
