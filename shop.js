@@ -155,6 +155,7 @@ function productCard(p) {
             ${favButton(p.id)}
         </div>
         <div class="card-body d-flex flex-column">
+            <span class="badge rounded-pill text-bg-light align-self-center mb-2">${p.brand}</span>
             <h3 class="card-title"><a href="${url}">${p.name}</a></h3>
             <p class="card-price">${formatPrice(p.price)}</p>
             <a class="btn mt-auto" href="${url}">Обрати розмір</a>
@@ -280,17 +281,31 @@ function renderProduct(root) {
                 <div class="size-grid" role="radiogroup" aria-label="Розмір">${sizeButtons}</div>
                 <p class="size-hint" hidden>Будь ласка, оберіть розмір</p>
 
-                <details class="size-guide mb-3">
-                    <summary class="link-summary">📏 Як обрати розмір?</summary>
-                    <div class="size-guide-body">
-                        <p class="small mb-2">Виміряйте довжину стопи від п'ятки до найдовшого пальця.
-                        Якщо вийшло між розмірами, беріть більший.</p>
-                        <table class="table table-sm mb-0">
-                            <thead><tr><th>EU</th><th>Довжина стопи</th></tr></thead>
-                            <tbody>${guideRows}</tbody>
-                        </table>
+                <!-- Кнопка відкриває Bootstrap Modal з таблицею розмірів -->
+                <p class="mb-3">
+                    <button type="button" class="link-btn" data-bs-toggle="modal" data-bs-target="#size-modal">📏 Як обрати розмір?</button>
+                </p>
+                <div class="modal fade" id="size-modal" tabindex="-1" aria-labelledby="size-modal-title" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title fs-5" id="size-modal-title">📏 Таблиця розмірів</h3>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small">Виміряйте довжину стопи від п'ятки до найдовшого пальця.
+                                Якщо вийшло між розмірами, беріть більший.</p>
+                                <table class="table table-sm table-striped mb-0">
+                                    <thead><tr><th>EU</th><th>Довжина стопи</th></tr></thead>
+                                    <tbody>${guideRows}</tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn" data-bs-dismiss="modal">Зрозуміло</button>
+                            </div>
+                        </div>
                     </div>
-                </details>
+                </div>
 
                 <button type="button" class="btn btn-big btn-main w-100" data-add>Додати в кошик</button>
                 <div class="added-msg" hidden>✅ Розмір <span data-added-size></span> додано в кошик · <a href="cart.html">Перейти до кошика</a></div>
@@ -328,8 +343,16 @@ function renderProduct(root) {
             return;
         }
         addToCart(p.id, selected);
-        added.querySelector('[data-added-size]').textContent = selected;
-        added.hidden = false;
+
+        // Bootstrap Toast у кутку екрана; якщо Bootstrap JS не завантажився, показуємо текст під кнопкою
+        const toastEl = document.getElementById('cart-toast');
+        if (toastEl && window.bootstrap) {
+            toastEl.querySelector('[data-toast-text]').textContent = `${p.name}, розмір ${selected} — додано в кошик ✅`;
+            bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 4000 }).show();
+        } else {
+            added.querySelector('[data-added-size]').textContent = selected;
+            added.hidden = false;
+        }
     });
 
     // «Вам також сподобається»: 4 наступні моделі по колу
@@ -513,7 +536,8 @@ function bindOrderForm(form) {
 
         status.hidden = true;
         submit.disabled = true;
-        submit.textContent = 'Надсилаємо...';
+        // Bootstrap Spinner на кнопці, поки лист надсилається
+        submit.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Надсилаємо...';
 
         fetch('https://api.web3forms.com/submit', {
             method: 'POST',
