@@ -281,16 +281,16 @@ function renderProduct(root) {
                 <div class="size-grid" role="radiogroup" aria-label="Розмір">${sizeButtons}</div>
                 <p class="size-hint" hidden>Будь ласка, оберіть розмір</p>
 
-                <!-- Кнопка відкриває Bootstrap Modal з таблицею розмірів -->
-                <p class="mb-3">
-                    <button type="button" class="link-btn" data-bs-toggle="modal" data-bs-target="#size-modal">📏 Як обрати розмір?</button>
-                </p>
-                <div class="modal fade" id="size-modal" tabindex="-1" aria-labelledby="size-modal-title" aria-hidden="true">
+                <!-- Вікно Bootstrap Modal відкривається звичайним посиланням (#size-modal) через CSS :target,
+                     без JavaScript. Закривається посиланням #! або кліком по темному фону -->
+                <p class="mb-3"><a class="link-btn" href="#size-modal">📏 Як обрати розмір?</a></p>
+                <div class="modal css-modal" id="size-modal" role="dialog" aria-labelledby="size-modal-title">
+                    <a class="css-modal-backdrop" href="#!" aria-label="Закрити"></a>
                     <div class="modal-dialog modal-dialog-centered modal-sm">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h3 class="modal-title fs-5" id="size-modal-title">📏 Таблиця розмірів</h3>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                                <a class="btn-close" href="#!" aria-label="Закрити"></a>
                             </div>
                             <div class="modal-body">
                                 <p class="small">Виміряйте довжину стопи від п'ятки до найдовшого пальця.
@@ -301,14 +301,18 @@ function renderProduct(root) {
                                 </table>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn" data-bs-dismiss="modal">Зрозуміло</button>
+                                <a class="btn" href="#!">Зрозуміло</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <button type="button" class="btn btn-big btn-main w-100" data-add>Додати в кошик</button>
-                <div class="added-msg" hidden>✅ Розмір <span data-added-size></span> додано в кошик · <a href="cart.html">Перейти до кошика</a></div>
+                <!-- Bootstrap Alert: з'являється після додавання в кошик -->
+                <div class="alert alert-success mt-3 mb-0" role="status" hidden>
+                    ✅ Розмір <span data-added-size></span> додано в кошик ·
+                    <a href="cart.html" class="alert-link">Перейти до кошика</a>
+                </div>
                 <ul class="perks list-unstyled mt-4">
                     <li>🚚 Доставка Новою Поштою за 1–3 дні</li>
                     <li>💳 Оплата при отриманні</li>
@@ -320,7 +324,7 @@ function renderProduct(root) {
     let selected = null;
     const grid = root.querySelector('.size-grid');
     const hint = root.querySelector('.size-hint');
-    const added = root.querySelector('.added-msg');
+    const added = root.querySelector('.alert-success');
 
     grid.addEventListener('click', e => {
         const btn = e.target.closest('.size-btn');
@@ -343,16 +347,8 @@ function renderProduct(root) {
             return;
         }
         addToCart(p.id, selected);
-
-        // Bootstrap Toast у кутку екрана; якщо Bootstrap JS не завантажився, показуємо текст під кнопкою
-        const toastEl = document.getElementById('cart-toast');
-        if (toastEl && window.bootstrap) {
-            toastEl.querySelector('[data-toast-text]').textContent = `${p.name}, розмір ${selected} — додано в кошик ✅`;
-            bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 4000 }).show();
-        } else {
-            added.querySelector('[data-added-size]').textContent = selected;
-            added.hidden = false;
-        }
+        added.querySelector('[data-added-size]').textContent = selected;
+        added.hidden = false;
     });
 
     // «Вам також сподобається»: 4 наступні моделі по колу

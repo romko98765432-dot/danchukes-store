@@ -174,19 +174,48 @@ summary::-webkit-details-marker { display: none; }
     outline-offset: 2px;
 }
 
-/* ===== Карусель на головній (Bootstrap Carousel) ===== */
-.hero { border-radius: 16px; overflow: hidden; }
-.hero .carousel-item img { height: 420px; object-fit: cover; }
-/* затемнення знизу, щоб білий текст читався на будь-якому фото */
-.hero .carousel-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, .7), transparent 60%);
+/* ===== Bootstrap Modal без JavaScript: відкривається, коли адреса закінчується на #size-modal ===== */
+.css-modal:target {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, .5);
 }
-.hero .carousel-caption { z-index: 2; bottom: 2.5rem; }
-.hero .carousel-caption h2 { font-weight: bold; }
-.hero .carousel-indicators { z-index: 3; }
+.css-modal .modal-dialog { position: relative; z-index: 1; width: 100%; }
+.css-modal-backdrop { position: absolute; inset: 0; }   /* клік по темному фону закриває вікно */
+a.link-btn { display: inline-block; }
+
+/* ===== Bootstrap Accordion на <details> без JavaScript ===== */
+/* Скасовуємо наш стиль «кнопки-пігулки» для summary всередині акордеона */
+.css-accordion summary.accordion-button {
+    display: flex;
+    padding: var(--bs-accordion-btn-padding-y) var(--bs-accordion-btn-padding-x);
+    background: var(--bs-accordion-btn-bg);
+    color: var(--bs-accordion-btn-color);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 1rem;
+}
+.css-accordion summary.accordion-button:hover {
+    background: var(--bs-accordion-btn-bg) !important;
+    border-color: transparent !important;
+}
+/* Відкрите питання: підсвітка і стрілка вгору, як у Bootstrap */
+.css-accordion details[open] > summary.accordion-button,
+.css-accordion details[open] > summary.accordion-button:hover {
+    background: var(--bs-accordion-active-bg) !important;
+    color: var(--bs-accordion-active-color) !important;
+    box-shadow: inset 0 calc(-1 * var(--bs-accordion-border-width)) 0 var(--bs-accordion-border-color);
+}
+.css-accordion details:not([open]) > summary.accordion-button::after {
+    background-image: var(--bs-accordion-btn-icon);
+    transform: none;
+}
+.css-accordion details[open] > summary.accordion-button::after {
+    background-image: var(--bs-accordion-btn-active-icon);
+    transform: var(--bs-accordion-btn-icon-transform);
+}
+.css-accordion details:first-child > summary.accordion-button { border-radius: var(--bs-accordion-inner-border-radius) var(--bs-accordion-inner-border-radius) 0 0; }
 
 /* Бейдж бренду на картці (Bootstrap Badge) */
 .card .badge { font-weight: normal; }
@@ -437,10 +466,6 @@ summary::-webkit-details-marker { display: none; }
     .header-home { grid-template-columns: 1fr 1fr; }
     .header-home .logo { grid-column: 1 / -1; order: -1; text-align: center; }
     .logo { font-size: 20px; }
-
-    .hero .carousel-item img { height: 280px; }
-    .hero .carousel-caption { bottom: 1.8rem; }
-    .hero .carousel-caption p { display: none; }
 
     .catalog-toolbar { flex-direction: column; }
     .catalog-toolbar .form-select { max-width: none; }
